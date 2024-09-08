@@ -47,11 +47,7 @@ export class PostsController {
   })
   @Post()
   public createPost(@Body() createPostDto: CreatePostDto) {
-    return {
-      success: true,
-      message: "New post created successfully",
-      data: createPostDto
-    }
+    return this.postsService.create(createPostDto);
   }
 
 

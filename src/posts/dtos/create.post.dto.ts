@@ -1,8 +1,9 @@
-import { IsArray, IsDateString, IsEnum, IsISO8601, IsJSON, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsISO8601, IsJSON, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { PostType } from "../enums/posttypes.enum";
 import { PostStatus } from "../enums/post.status.enum";
 import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { CreatePostMetaOptionsDto } from "src/meta-option/dtos/create.post.meta.option.dto";
 
 /** Create post dto class */
 export class CreatePostDto {
@@ -14,6 +15,7 @@ export class CreatePostDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
+  @MaxLength(512)
   title: string;
 
 
@@ -34,12 +36,12 @@ export class CreatePostDto {
   })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(256)
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message:
       'A slug should be all small letters and uses only "-" and without spaces. For example "my-url"',
   })
   slug: string;
-
 
   /**Status of the post */
   @ApiProperty({
@@ -78,6 +80,7 @@ export class CreatePostDto {
   })
   @IsOptional()
   @IsUrl()
+  @MaxLength(1024)
   featuredImageUrl: string;
 
 
@@ -105,52 +108,46 @@ export class CreatePostDto {
 
   /**
    * Type decorator: it does two things
-   * 1. It matches the incoing requests to a particular dto, for example here the dto is CreateMetaOptionsDto, and
-   *    Creates the instance of a particular dto for example CreateMetaOptionsDto in this case
+   * 1. It matches the incoing requests to a particular dto, for example here the dto is CreatePostMetaOptionsDto, and
+   *    Creates the instance of a particular dto for example CreatePostMetaOptionsDto in this case
    * 
-   * 2. All the properties of the incoing request will be validated against the CreateMetaOptionsDto
+   * 2. All the properties of the incoing request will be validated against the CreatePostMetaOptionsDto
    */
   //NOTE:nested object swagger setup
   @ApiPropertyOptional({
-    type: "array",
+    type: "object",
     required: false,
     items: {
       type: 'object',
       properties: {
-        key: {
+        metaValue: {
           type: "string",
-          description: "The key can be identifire for your meta options",
-          example: "sidebarEnabled"
-        },
-        value: {
-          type: "any",
-          description: "Any value that your want to save to the key",
-          example: true
+          description: "The meta value is a JSON string",
+          example: "{\"sidebarEnabled\"}"
         }
       }
     }
   })
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateMetaOptionsDto)
-  metaOptions?: CreateMetaOptionsDto[]
+  @Type(() => CreatePostMetaOptionsDto)
+  metaOption?: CreatePostMetaOptionsDto | null
 }
 
 /**
  * Create meta option dto class
  */
-export class CreateMetaOptionsDto {
-  /**
-   * key of meta option dto
-   */
-  @IsNotEmpty()
-  @IsString()
-  key: string;
+// export class CreatePostMetaOptionsDto {
+//   /**
+//    * key of meta option dto
+//    */
+//   @IsNotEmpty()
+//   @IsString()
+//   key: string;
 
-  /**
-   * Value of meta option dto
-   */
-  @IsNotEmpty()
-  value: any;
-}
+//   /**
+//    * Value of meta option dto
+//    */
+//   @IsNotEmpty()
+//   value: any;
+// }

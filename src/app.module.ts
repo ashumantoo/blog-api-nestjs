@@ -5,6 +5,10 @@ import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/user.entity';
+import { TagsModule } from './tags/tags.module';
+import { MetaOptionsModule } from './meta-option/meta-option.module';
+import { MetaOptionService } from './meta-option/providers/meta-option.service';
 
 @Module({
   imports: [
@@ -29,7 +33,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [],
       useFactory: () => ({
         type: 'postgres',
-        entities: [], //All entities which are defined within the application needs to be added here in this array then only nestjs will aware about the created entity and entitty is noting but definition of db tables
+        //entities: [User], //All entities which are defined within the application needs to be added here in this array then only nestjs will aware about the created entity and entitty is noting but definition of db tables
+        autoLoadEntities: true,
         synchronize: true, //only use in dev env
         port: 5432,
         username: 'postgres',
@@ -37,7 +42,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         host: 'localhost',
         database: 'nestjs-blog'
       })
-    })
+    }),
+    TagsModule,
+    MetaOptionsModule
   ],
   controllers: [AppController],
   providers: [AppService],
