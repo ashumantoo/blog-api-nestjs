@@ -1,6 +1,6 @@
 import { PartialType } from "@nestjs/mapped-types";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, matches, MaxLength, MinLength } from "class-validator";
-import { CreateUserDto } from "./create-user-dto";
+import { CreateUserDto } from "./create.user.dto";
 
 /***************** Mapped types *****************
  *  This package from NestJS help us to inherit specific DTO and allows us to import
