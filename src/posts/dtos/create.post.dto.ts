@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsISO8601, IsJSON, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsISO8601, IsJSON, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { PostType } from "../enums/posttypes.enum";
 import { PostStatus } from "../enums/post.status.enum";
 import { Type } from "class-transformer";
@@ -111,7 +111,7 @@ export class CreatePostDto {
    * 1. It matches the incoing requests to a particular dto, for example here the dto is CreatePostMetaOptionsDto, and
    *    Creates the instance of a particular dto for example CreatePostMetaOptionsDto in this case
    * 
-   * 2. All the properties of the incoing request will be validated against the CreatePostMetaOptionsDto
+   * 2. All the properties of the incoming request will be validated against the CreatePostMetaOptionsDto
    */
   //NOTE:nested object swagger setup
   @ApiPropertyOptional({
@@ -132,22 +132,13 @@ export class CreatePostDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
   metaOption?: CreatePostMetaOptionsDto | null
+
+  @ApiProperty({
+    type: "integer",
+    required: true,
+    example: 1
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  authorId: number;
 }
-
-/**
- * Create meta option dto class
- */
-// export class CreatePostMetaOptionsDto {
-//   /**
-//    * key of meta option dto
-//    */
-//   @IsNotEmpty()
-//   @IsString()
-//   key: string;
-
-//   /**
-//    * Value of meta option dto
-//    */
-//   @IsNotEmpty()
-//   value: any;
-// }

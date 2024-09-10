@@ -17,7 +17,7 @@ export class AuthService {
    */
   public login(email: string, password: string, userId: string) {
     //check if user exists in the database
-    const user = this.usersService.findOneById(userId)
+    // const user = this.usersService.findOneById(userId)
     //login
 
     //token

@@ -1,8 +1,23 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostType } from "./enums/posttypes.enum";
 import { PostStatus } from "./enums/post.status.enum";
 import { CreatePostMetaOptionsDto } from "src/meta-option/dtos/create.post.meta.option.dto";
 import { MetaOption } from "src/meta-option/meta-option.entity";
+import { User } from "src/users/user.entity";
+
+/** cascade: If set to true, the related object will be inserted and updated in the database. 
+  * For more details please check https://typeorm.io/relations#cascades
+  * 
+  * eager: true ---> this will be used to reslove the foreign key to join the table internally and send the requied data along with posts query
+  * Bi-drectional relationship between metaoptions and posts
+  * 
+  * --> Post and User entity are in a relationship of one-to-many and many-to-one
+  *  -  Post Entity with User Entity in ---> Many to One Relation (Means Many post can belong to one User)
+  *     User Entity with Post Entity in ---> One to Many Relation (Means One User can have Many posts)
+  *  
+  *  -  This type of relation is always bi-directional, and we don't have to defined JoinColumn() decorator, it is automatically will handled by typeorm
+  *  -  Foreign key always lies with the Many-to-one side - i.e, autherid will be stored in post table as FK
+ */
 
 @Entity()
 export class Post {
@@ -64,9 +79,14 @@ export class Post {
   })
   publishOn?: Date;
 
-  @OneToOne(() => MetaOption)
-  @JoinColumn()
+  @OneToOne(() => MetaOption, (metaOption) => metaOption.post, {
+    cascade: true,
+    eager: true
+  })
   metaOption?: MetaOption;
+
+  @ManyToOne(() => User, (user) => user.posts)
+  author: User;
 
   //TODO: check this once we add relationship of database
   tags?: string[];
