@@ -1,9 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostType } from "./enums/posttypes.enum";
 import { PostStatus } from "./enums/post.status.enum";
 import { CreatePostMetaOptionsDto } from "src/meta-option/dtos/create.post.meta.option.dto";
 import { MetaOption } from "src/meta-option/meta-option.entity";
 import { User } from "src/users/user.entity";
+import { Tag } from "src/tags/tag.entity";
 
 /** cascade: If set to true, the related object will be inserted and updated in the database. 
   * For more details please check https://typeorm.io/relations#cascades
@@ -85,9 +86,14 @@ export class Post {
   })
   metaOption?: MetaOption;
 
+  //Bi-directional relationship
   @ManyToOne(() => User, (user) => user.posts)
   author: User;
 
-  //TODO: check this once we add relationship of database
-  tags?: string[];
+  //Bi-directional relationship
+  @ManyToMany(() => Tag, (tag) => tag.posts, {
+    eager: true //it will populate the other table data using the Foreign key
+  })
+  @JoinTable()
+  tags?: Tag[];
 }

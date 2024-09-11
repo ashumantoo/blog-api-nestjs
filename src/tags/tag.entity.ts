@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Post } from "src/posts/post.entity";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Tag {
@@ -38,6 +39,14 @@ export class Tag {
     nullable: true
   })
   featuredImageUrl: string;
+
+  //Bi-directional relationship by defining two functions inside the @ManyToMany() decorator
+  //if there is only one function inside the @ManyToMany(), then it will be a uni-directional realtionship
+  //like this @ManyToMany(()=>Post)
+  @ManyToMany(() => Post, (post) => post.tags, {
+    onDelete: "CASCADE"
+  })
+  posts: Post[];
 
   @CreateDateColumn()
   createDate: Date;

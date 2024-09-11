@@ -7,6 +7,7 @@ export class CreateTagDto {
     example: "Javascript"
   })
   @IsString()
+  @IsNotEmpty()
   @MinLength(3)
   @MaxLength(256)
   name: string;

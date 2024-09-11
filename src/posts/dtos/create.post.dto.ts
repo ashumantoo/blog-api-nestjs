@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsISO8601, IsJSON, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsInt, IsISO8601, IsJSON, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { PostType } from "../enums/posttypes.enum";
 import { PostStatus } from "../enums/post.status.enum";
 import { Type } from "class-transformer";
@@ -96,14 +96,13 @@ export class CreatePostDto {
 
   /**tags of the post */
   @ApiPropertyOptional({
-    description: "Array of tags passed as a string value",
-    example: "['nestjs','typescript']"
+    description: "Array of ids of Tags",
+    example: "[1,2]"
   })
   @IsArray()
   @IsOptional()
-  @IsString({ each: true })
-  @MinLength(3, { each: true })
-  tags?: string[];
+  @IsInt({ each: true })
+  tags?: number[];
 
 
   /**
