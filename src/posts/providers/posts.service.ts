@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MetaOption } from 'src/meta-option/meta-option.entity';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch.post.dto';
+import { ConfigService } from '@nestjs/config';
 
 /** 
  -->Below code is not required since I have used cascade propery on post OneToOne() mapping
@@ -41,7 +42,8 @@ export class PostsService {
     //We need to import this in post.module.ts file
     private metaOptionRepostory: Repository<MetaOption>,
     private readonly usersService: UsersService,
-    private readonly tagsService: TagsService
+    private readonly tagsService: TagsService,
+    private readonly configService: ConfigService
   ) { }
 
   /**Create new posts */
@@ -81,6 +83,8 @@ export class PostsService {
    * Fetch All the posts
    */
   public async getAllPosts() {
+    const S3_BUCKET = this.configService.get('S3_BUCKET');
+    console.log("HHHHHHHHH-----", S3_BUCKET);
     //With eagar
     // const posts = await this.postRepository.find();
 

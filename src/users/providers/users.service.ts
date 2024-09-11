@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "../dtos/create.user.dto";
+import { ConfigService } from "@nestjs/config";
 
 /**==============================================================================================================================
  * 1) the create method of typeorm repository, it will not create the record in the db directly instead it will just create an 
@@ -21,6 +22,8 @@ export class UsersService {
    * Constructor to initialize different services/provides
    */
   constructor(
+    /**Injecting Config service */
+    private readonly configService: ConfigService,
     /** Injeting userRepository */
     @InjectRepository(User)
     private userRepository: Repository<User>,
