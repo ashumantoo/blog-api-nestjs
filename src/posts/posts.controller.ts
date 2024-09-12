@@ -4,6 +4,7 @@ import { get } from 'http';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dtos/create.post.dto';
 import { PatchPostDto } from './dtos/patch.post.dto';
+import { GetPostsDto } from './dtos/get.post.dto';
 
 /**
  * Post controller class
@@ -22,16 +23,18 @@ export class PostsController {
    * Get /posts
    */
   @Get()
-  public getPosts() {
-    return this.postsService.getAllPosts();
+  public getPosts(
+    @Query() postQuery: GetPostsDto
+  ) {
+    return this.postsService.getAllPosts(postQuery);
   }
 
   /**
    * Get all posts of a user
    */
-  @Get()
-  public getPostsByUserId(@Param('userId') userId: string) {
-    return this.postsService.getAllPostsByUserId(userId);
+  @Get('/author/:id')
+  public getPostsByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.getAllPostsByUserId(id);
   }
 
 

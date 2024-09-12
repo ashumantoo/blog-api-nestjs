@@ -14,8 +14,12 @@ export class MetaOptionService {
   ) { }
 
   public async create(createMetaOptionDto: CreatePostMetaOptionsDto) {
-    let newMetaOption = this.metaOptionReposity.create(createMetaOptionDto);
-    newMetaOption = await this.metaOptionReposity.save(newMetaOption);
-    return newMetaOption;
+    try {
+      let newMetaOption = this.metaOptionReposity.create(createMetaOptionDto);
+      newMetaOption = await this.metaOptionReposity.save(newMetaOption);
+      return newMetaOption;
+    } catch (error) {
+      throw error;
+    }
   }
 }

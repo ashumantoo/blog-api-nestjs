@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/providers/users.service';
 import { CreatePostDto } from '../dtos/create.post.dto';
 import { Repository } from 'typeorm';
@@ -8,6 +8,9 @@ import { MetaOption } from 'src/meta-option/meta-option.entity';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch.post.dto';
 import { ConfigService } from '@nestjs/config';
+import { GetPostsDto } from '../dtos/get.post.dto';
+import { PaginationProvider } from 'src/common/pagination/providers/pagination.provider';
+import { IPagination } from 'src/common/pagination/interfaces/pagination.interface';
 
 /** 
  -->Below code is not required since I have used cascade propery on post OneToOne() mapping
@@ -43,86 +46,122 @@ export class PostsService {
     private metaOptionRepostory: Repository<MetaOption>,
     private readonly usersService: UsersService,
     private readonly tagsService: TagsService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly paginationService: PaginationProvider
   ) { }
 
   /**Create new posts */
   public async create(createPostDto: CreatePostDto) {
-    const user = await this.usersService.findOneById(createPostDto.authorId);
-    const tags = await this.tagsService.getMultipleTags(createPostDto.tags);
-    const newPost = this.postRepository.create({
-      ...createPostDto,
-      author: user,
-      tags
-    });
-    return await this.postRepository.save(newPost);
+    try {
+      const user = await this.usersService.findOneById(createPostDto.authorId);
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      const tags = await this.tagsService.getMultipleTags(createPostDto.tags);
+      if (!tags || tags.length !== createPostDto.tags.length) {
+        throw new BadRequestException("Please check your tag Ids and ensure they are correct")
+      }
+      const newPost = this.postRepository.create({
+        ...createPostDto,
+        author: user,
+        tags
+      });
+      return await this.postRepository.save(newPost);
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async update(patchPostDto: PatchPostDto) {
-    const tags = await this.tagsService.getMultipleTags(patchPostDto.tags);
-    const post = await this.postRepository.findOneBy({ id: patchPostDto.id });
+    try {
+      const tags = await this.tagsService.getMultipleTags(patchPostDto.tags);
+      if (!tags || tags.length !== patchPostDto.tags.length) {
+        throw new BadRequestException("Please check your tag Ids and ensure they are correct")
+      }
+      const post = await this.postRepository.findOneBy({ id: patchPostDto.id });
+      if (!post) {
+        throw new NotFoundException("Post not found");
+      }
+      //update the new value of each property, ?? <-- null coalescing operator
+      post.title = patchPostDto.title ?? post.title;
+      post.slug = patchPostDto.slug ?? post.slug;
+      post.content = patchPostDto.content ?? post.content;
+      post.postType = patchPostDto.postType ?? post.postType;
+      post.status = patchPostDto.status ?? post.status;
+      post.schema = patchPostDto.schema ?? post.schema;
+      post.publishOn = patchPostDto.publishOn ?? post.publishOn;
+      post.featuredImageUrl = patchPostDto.featuredImageUrl ?? post.featuredImageUrl;
 
-    //update the new value of each property, ?? <-- null coalescing operator
-    post.title = patchPostDto.title ?? post.title;
-    post.slug = patchPostDto.slug ?? post.slug;
-    post.content = patchPostDto.content ?? post.content;
-    post.postType = patchPostDto.postType ?? post.postType;
-    post.status = patchPostDto.status ?? post.status;
-    post.schema = patchPostDto.schema ?? post.schema;
-    post.publishOn = patchPostDto.publishOn ?? post.publishOn;
-    post.featuredImageUrl = patchPostDto.featuredImageUrl ?? post.featuredImageUrl;
+      //Assign the new tags
+      post.tags = tags;
 
-    //Assign the new tags
-    post.tags = tags;
-
-    //save the post and return
-    return await this.postRepository.save(post);
+      //save the post and return
+      return await this.postRepository.save(post);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Fetch All the posts
    */
-  public async getAllPosts() {
-    const S3_BUCKET = this.configService.get('S3_BUCKET');
-    console.log("HHHHHHHHH-----", S3_BUCKET);
-    //With eagar
-    // const posts = await this.postRepository.find();
+  public async getAllPosts(postQuery: GetPostsDto): Promise<IPagination<Post>> {
+    try {
+      //With eagar
+      // const posts = await this.postRepository.find();
 
-    //Without eager - populating the data
-    const posts = await this.postRepository.find({
-      relations: {
-        metaOption: true,
-        author: true, //key will same as what we have defined in entity file
-        tags: true
-      }
-    });
-    return posts;
+      //Without eager - populating the data
+      // const posts = await this.postRepository.find({
+      //   relations: {
+      //     metaOption: true,
+      //     author: true, //key will same as what we have defined in entity file
+      //     tags: true
+      //   },
+      //   skip: (postQuery.page - 1) * postQuery.limit,
+      //   take: postQuery.limit
+      // });
+      const posts = await this.paginationService.paginateQuery({
+        limit: postQuery.limit,
+        page: postQuery.page
+      }, this.postRepository)
+      return posts;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Fetch all the post of a user
    */
-  public getAllPostsByUserId(userId: string) {
-    // const user = this.usersService.findOneById(userId);
-    return {
-      success: true,
-      status: 200,
-      data: []
-    };
+  public async getAllPostsByUserId(authorId: number) {
+    try {
+      const posts = await this.postRepository.find({
+        where: {
+          author: { id: authorId }
+        }
+      });
+      return posts;
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async deleteById(id: number) {
-    /** Without using the CASCADE
-      const post = await this.postRepository.findOneBy({ id });
+    try {
+      /** Without using the CASCADE
+       const post = await this.postRepository.findOneBy({ id });
+       await this.postRepository.delete(id);
+       await this.metaOptionRepostory.delete(post.metaOption.id);
+ 
+     - with CASCADE, meta-option will also be delted automatically
+     - In Bi-directional and Many to one and one-to-many relationship like post and user here the CASCASE if defined under the hood 
+       if we delete the post the relationship table with tags is also will be deleted since tag and post are created in a different table 
+       and this will just delte the relationship table row not the actual tags
+     */
       await this.postRepository.delete(id);
-      await this.metaOptionRepostory.delete(post.metaOption.id);
-
-    - with CASCADE, meta-option will also be delted automatically
-    - In Bi-directional and Many to one and one-to-many relationship like post and user here the CASCASE if defined under the hood 
-      if we delete the post the relationship table with tags is also will be deleted since tag and post are created in a different table 
-      and this will just delte the relationship table row not the actual tags
-    */
-    await this.postRepository.delete(id);
-    return { deleted: true, id }
+      return { deleted: true, id }
+    } catch (error) {
+      throw error;
+    }
   }
 }

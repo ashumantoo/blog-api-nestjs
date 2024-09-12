@@ -12,33 +12,49 @@ export class TagsService {
   ) { }
 
   public async create(createTagDto: CreateTagDto) {
-    const tag = this.tagRepository.create(createTagDto);
-    return this.tagRepository.save(tag);
+    try {
+      const tag = this.tagRepository.create(createTagDto);
+      return this.tagRepository.save(tag);
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async getMultipleTags(tags: number[]) {
-    let results = await this.tagRepository.find({
-      where: {
-        id: In(tags)
-      }
-    });
-    return results;
+    try {
+      let results = await this.tagRepository.find({
+        where: {
+          id: In(tags)
+        }
+      });
+      return results;
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async delete(id: number) {
-    await this.tagRepository.delete(id);
-    return {
-      success: true,
-      id
+    try {
+      await this.tagRepository.delete(id);
+      return {
+        success: true,
+        id
+      }
+    } catch (error) {
+      throw error;
     }
   }
 
   //This will not remove the record from the db instead it will add a new column in the table called deletedAt(timestamp)
   public async softRemove(id: number) {
-    await this.tagRepository.softDelete(id);
-    return {
-      success: true,
-      id
+    try {
+      await this.tagRepository.softDelete(id);
+      return {
+        success: true,
+        id
+      }
+    } catch (error) {
+      throw error;
     }
   }
 }

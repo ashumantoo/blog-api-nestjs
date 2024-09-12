@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { config } from 'process';
 import { appConfig } from './config/app.config';
 import { envValidationSchema } from './config/environment.validation';
+import { PaginationModule } from './common/pagination/pagination.module';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -55,7 +56,8 @@ const ENV = process.env.NODE_ENV;
       })
     }),
     TagsModule,
-    MetaOptionsModule
+    MetaOptionsModule,
+    PaginationModule
   ],
   controllers: [AppController],
   providers: [AppService],

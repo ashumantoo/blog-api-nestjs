@@ -87,7 +87,9 @@ export class Post {
   metaOption?: MetaOption;
 
   //Bi-directional relationship
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, {
+    eager: true
+  })
   author: User;
 
   //Bi-directional relationship
