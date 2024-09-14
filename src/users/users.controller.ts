@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   ValidationPipe
 } from "@nestjs/common";
 import { CreateUserDto } from "./dtos/create.user.dto";
@@ -17,6 +18,9 @@ import { PatchUserDto } from "./dtos/patch.user.dto";
 import { UsersService } from "./providers/users.service";
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreateManyUserDto } from "./dtos/create.many.user.dto";
+import { AccessTokenGuard } from "src/auth/guards/access-token/access-token.guard";
+import { Auth } from "src/auth/decorators/auth/auth.decorator";
+import { AuthTypes } from "src/auth/enums/auth.types.enum";
 
 /**
  * Users controller class to defined different users routes
@@ -65,7 +69,6 @@ export class UsersController {
   /**
    * Get user by Id
    */
-
   @Get(':id')
   public getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOneById(id);
@@ -75,6 +78,7 @@ export class UsersController {
    * Create new user
    */
   @Post()
+  // @Auth(AuthTypes.None) //Treating as a Public routes using custom decorator
   public createUser(
     @Body() createUserDto: CreateUserDto
   ) {

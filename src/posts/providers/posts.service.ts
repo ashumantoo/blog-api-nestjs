@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { GetPostsDto } from '../dtos/get.post.dto';
 import { PaginationProvider } from 'src/common/pagination/providers/pagination.provider';
 import { IPagination } from 'src/common/pagination/interfaces/pagination.interface';
+import { IActiveUser } from 'src/auth/interfaces/active.user.interface';
 
 /** 
  -->Below code is not required since I have used cascade propery on post OneToOne() mapping
@@ -51,15 +52,18 @@ export class PostsService {
   ) { }
 
   /**Create new posts */
-  public async create(createPostDto: CreatePostDto) {
+  public async create(createPostDto: CreatePostDto, activeUser: IActiveUser) { //active user is logged in user and available in the req header
     try {
-      const user = await this.usersService.findOneById(createPostDto.authorId);
+      let tags = null;
+      const user = await this.usersService.findOneById(activeUser.sub);
       if (!user) {
         throw new NotFoundException("User not found");
       }
-      const tags = await this.tagsService.getMultipleTags(createPostDto.tags);
-      if (!tags || tags.length !== createPostDto.tags.length) {
-        throw new BadRequestException("Please check your tag Ids and ensure they are correct")
+      if (createPostDto.tags && createPostDto.tags.length) {
+        tags = await this.tagsService.getMultipleTags(createPostDto.tags);
+        if (!tags || tags.length !== createPostDto.tags.length) {
+          throw new BadRequestException("Please check your tag Ids and ensure they are correct")
+        }
       }
       const newPost = this.postRepository.create({
         ...createPostDto,

@@ -4,6 +4,7 @@ import { PostStatus } from "../enums/post.status.enum";
 import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { CreatePostMetaOptionsDto } from "src/meta-option/dtos/create.post.meta.option.dto";
+import { Unique } from "typeorm";
 
 /** Create post dto class */
 export class CreatePostDto {
@@ -132,12 +133,13 @@ export class CreatePostDto {
   @Type(() => CreatePostMetaOptionsDto)
   metaOption?: CreatePostMetaOptionsDto | null
 
-  @ApiProperty({
-    type: "integer",
-    required: true,
-    example: 1
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  authorId: number;
+  //Not required in the Dto now since now I am taking the logged in user data from req header
+  // @ApiProperty({
+  //   type: "integer",
+  //   required: true,
+  //   example: 1
+  // })
+  // @IsNumber()
+  // @IsNotEmpty()
+  // authorId: number;
 }

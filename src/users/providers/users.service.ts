@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, RequestTimeoutException } from "@nestjs/common";
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, RequestTimeoutException, UseGuards } from "@nestjs/common";
 import { GetUserParamsDto } from "../dtos/get.user.params.dto";
 import { AuthService } from "src/auth/providers/auth.service";
 import { DataSource, Repository } from "typeorm";
@@ -7,6 +7,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "../dtos/create.user.dto";
 import { ConfigService } from "@nestjs/config";
 import { CreateManyUserDto } from "../dtos/create.many.user.dto";
+import { HashingProvider } from "src/auth/providers/hashing.provider";
+import { AccessTokenGuard } from "src/auth/guards/access-token/access-token.guard";
 
 /**==============================================================================================================================
  * 1) the create method of typeorm repository, it will not create the record in the db directly instead it will just create an 
@@ -32,7 +34,9 @@ export class UsersService {
     private readonly authService: AuthService,
 
     /**Injecting Datasource from typeorm for transaxtions */
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    /** Injecting Hashing provider to hash the password */
+    private readonly hashingProvider: HashingProvider
   ) { }
 
   public async createUser(createUserDto: CreateUserDto) {
@@ -43,9 +47,29 @@ export class UsersService {
       if (existingUser) {
         throw new BadRequestException("User already exists with the email");
       }
-      let newUser = this.userRepository.create(createUserDto);
+      let newUser = this.userRepository.create({
+        ...createUserDto,
+        password: await this.hashingProvider.hashPassword(createUserDto.password)
+      });
       newUser = await this.userRepository.save(newUser);
       return newUser;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Find one user by email
+   */
+  public async findUserByEmail(email: string) {
+    try {
+      const user = this.userRepository.findOneBy({
+        email
+      });
+      if (!user) {
+        throw new NotFoundException("User with this email not found");
+      }
+      return user;
     } catch (error) {
       throw error;
     }

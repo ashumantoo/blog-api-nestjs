@@ -14,6 +14,9 @@ import { config } from 'process';
 import { appConfig } from './config/app.config';
 import { envValidationSchema } from './config/environment.validation';
 import { PaginationModule } from './common/pagination/pagination.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
+import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -60,6 +63,15 @@ const ENV = process.env.NODE_ENV;
     PaginationModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { //Applying accessTokenguard globally - it will protect all the routes even for those routes as well which should not be tristricted,
+      //We need to make those routes public 
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard
+    },
+    AccessTokenGuard //Since AuthenticationGuard has dependancy we have to provide AccessTokenGuard inside the provider also
+  ],
+  exports: [ConfigModule]
 })
 export class AppModule { }

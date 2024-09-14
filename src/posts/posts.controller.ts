@@ -5,6 +5,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dtos/create.post.dto';
 import { PatchPostDto } from './dtos/patch.post.dto';
 import { GetPostsDto } from './dtos/get.post.dto';
+import { ActiveUser } from 'src/auth/decorators/auth/active.user.decorator';
+import { IActiveUser } from 'src/auth/interfaces/active.user.interface';
 
 /**
  * Post controller class
@@ -49,8 +51,8 @@ export class PostsController {
     description: "Post is created successfully"
   })
   @Post()
-  public createPost(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  public createPost(@Body() createPostDto: CreatePostDto, @ActiveUser() user: IActiveUser) {
+    return this.postsService.create(createPostDto, user);
   }
 
 
