@@ -5,6 +5,11 @@ import { HashingProvider } from './hashing.provider';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { IActiveUser } from '../interfaces/active.user.interface';
+import { RefreshTokenDto } from '../dtos/refresh.token.dto';
+import { RefreshTokenProvider } from './refresh.token.provider';
+import { access } from 'fs';
+import { privateDecrypt } from 'crypto';
+import { GenerateTokensProvider } from './generate.tokens.provider';
 
 /**
  * Auth service class
@@ -19,9 +24,10 @@ export class AuthService {
     //Injecting hashing provider
     private readonly hashingProvider: HashingProvider,
 
-    private readonly jwtService: JwtService,
-    private readonly congiService: ConfigService
-
+    // private readonly jwtService: JwtService,
+    // private readonly configService: ConfigService,
+    private readonly refreshTokenProvider: RefreshTokenProvider,
+    private readonly generateTokenProvider: GenerateTokensProvider
   ) { }
 
   /**
@@ -34,31 +40,19 @@ export class AuthService {
       if (!passwordMached) {
         throw new UnauthorizedException("Password is incorrect.")
       }
-      const access_token = await this.jwtService.signAsync({
-        sub: user.id,
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`
-      } as IActiveUser, {
-        audience: this.congiService.get('jwt.tokenAudience'),
-        issuer: this.congiService.get('jwt.tokenIssuer'),
-        secret: this.congiService.get('jwt.secret'),
-        expiresIn: this.congiService.get('jwt.accessTokenTTL'),
-      }
-      )
+      const { accessToken, refreshToken } = await this.generateTokenProvider.generateTokens(user)
+
       return {
         success: true,
-        message: "Authenicated successfully",
-        access_token
+        accessToken,
+        refreshToken
       }
     } catch (error) {
       throw error;
     }
   }
 
-  /**
-   * Check if user is successfully logined or not
-   */
-  public isAuthenticated() {
-    return true;
+  public async getRefreshTokens(refreshTokenDto: RefreshTokenDto) {
+    return await this.refreshTokenProvider.refreshTokens(refreshTokenDto);
   }
 }

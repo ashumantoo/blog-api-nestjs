@@ -5,6 +5,8 @@ import { UsersModule } from 'src/users/users.module';
 import { HashingProvider } from './providers/hashing.provider';
 import { BcryptProvider } from './providers/bcrypt.provider';
 import { JwtModule } from '@nestjs/jwt';
+import { GenerateTokensProvider } from './providers/generate.tokens.provider';
+import { RefreshTokenProvider } from './providers/refresh.token.provider';
 
 @Module({
   controllers: [AuthController],
@@ -12,7 +14,9 @@ import { JwtModule } from '@nestjs/jwt';
     AuthService, {
       provide: HashingProvider,
       useClass: BcryptProvider
-    }
+    },
+    GenerateTokensProvider,
+    RefreshTokenProvider
   ],
   //Circular dependancy
   imports: [
