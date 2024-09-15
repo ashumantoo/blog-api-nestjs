@@ -9,6 +9,8 @@ import { ConfigService } from "@nestjs/config";
 import { CreateManyUserDto } from "../dtos/create.many.user.dto";
 import { HashingProvider } from "src/auth/providers/hashing.provider";
 import { AccessTokenGuard } from "src/auth/guards/access-token/access-token.guard";
+import { IGoogleUser } from "../interfaces/google.user.interface";
+import { CreateGoogleUserProvider } from "./create.google.user.provider";
 
 /**==============================================================================================================================
  * 1) the create method of typeorm repository, it will not create the record in the db directly instead it will just create an 
@@ -36,7 +38,8 @@ export class UsersService {
     /**Injecting Datasource from typeorm for transaxtions */
     private readonly dataSource: DataSource,
     /** Injecting Hashing provider to hash the password */
-    private readonly hashingProvider: HashingProvider
+    private readonly hashingProvider: HashingProvider,
+    private readonly createGoogleUserProvider: CreateGoogleUserProvider
   ) { }
 
   public async createUser(createUserDto: CreateUserDto) {
@@ -106,6 +109,21 @@ export class UsersService {
   }
 
   /**
+   * Find user by Id
+   */
+  public async findOneByGoogleId(googleId: string) {
+    try {
+      const user = await this.userRepository.findOneBy({ googleId });
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * create many users at once
    */
 
@@ -150,5 +168,9 @@ export class UsersService {
       }
     }
     return users;
+  }
+
+  public async createGoogleUser(googleUser: IGoogleUser) {
+    return await this.createGoogleUserProvider.createGoogleUser(googleUser);
   }
 }

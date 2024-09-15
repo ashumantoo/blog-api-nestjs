@@ -1,14 +1,9 @@
-import { Injectable, forwardRef, Inject, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, forwardRef, Inject, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/providers/users.service';
 import { SignInDto } from '../dtos/signin.dto';
 import { HashingProvider } from './hashing.provider';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { IActiveUser } from '../interfaces/active.user.interface';
 import { RefreshTokenDto } from '../dtos/refresh.token.dto';
 import { RefreshTokenProvider } from './refresh.token.provider';
-import { access } from 'fs';
-import { privateDecrypt } from 'crypto';
 import { GenerateTokensProvider } from './generate.tokens.provider';
 
 /**

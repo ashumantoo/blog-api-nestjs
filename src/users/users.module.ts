@@ -4,6 +4,7 @@ import { UsersService } from "./providers/users.service";
 import { AuthModule } from "src/auth/auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "./user.entity";
+import { CreateGoogleUserProvider } from './providers/create.google.user.provider';
 
 /**
  * Only Services or Providers can be exported from the module
@@ -16,7 +17,7 @@ import { User } from "./user.entity";
  */
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, CreateGoogleUserProvider],
   exports: [UsersService],
   imports: [
     /**Importing typeorm entity to create diff reposity inside the services/provider class */
