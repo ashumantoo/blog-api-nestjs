@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   DefaultValuePipe,
   Get,
@@ -10,6 +11,7 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
   ValidationPipe
 } from "@nestjs/common";
 import { CreateUserDto } from "./dtos/create.user.dto";
@@ -78,7 +80,8 @@ export class UsersController {
    * Create new user
    */
   @Post()
-  // @Auth(AuthTypes.None) //Treating as a Public routes using custom decorator
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Auth(AuthTypes.None) //Treating as a Public routes using custom decorator
   public createUser(
     @Body() createUserDto: CreateUserDto
   ) {

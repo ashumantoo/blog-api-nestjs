@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { Post } from "src/posts/post.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -36,12 +37,16 @@ export class User {
     length: 96,
     nullable: true
   })
+  //Whenever we use @Exclude() decorator with @UseInterceptors(ClassSerializerInterceptor) on any endpoint inside the 
+  //controller this property will be exluded from the response payload of the api
+  @Exclude()
   password?: string;
 
   @Column({
     type: 'varchar',
     nullable: true
   })
+  @Exclude()
   googleId?: string;
 
   @OneToMany(() => Post, (post) => post.author)

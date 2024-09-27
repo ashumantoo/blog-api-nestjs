@@ -1,5 +1,6 @@
 export const appConfig = () => ({
   environment: process.env.NODE_ENV,
+  apiVersion: process.env.API_VERSION,
   database: {
     host: process.env.DATABASE_HOST || 'localhost',
     port: parseInt(process.env.DATABASE_PORT) || 5432,
