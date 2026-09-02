@@ -26,7 +26,7 @@ async function bootstrap() {
    */
   const config = new DocumentBuilder()
     .setTitle("NestJS - Blog API")
-    .setDescription("Use the base url as http://localhost:300")
+    .setDescription("Use the base url as http://localhost:3000")
     .addServer("http://localhost:3000")
     .setVersion('1.0')
     .build();
@@ -36,7 +36,10 @@ async function bootstrap() {
   //enable coars
   app.enableCors();
 
-  await app.listen(3000);
+  const PORT = process.env.PORT || 3000
 
+  await app.listen(PORT);
+  console.log(`Server is up and running on port ${PORT}`);
 }
+
 bootstrap();
